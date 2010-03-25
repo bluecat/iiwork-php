@@ -90,11 +90,14 @@ class iiWork {
 		$this->referer = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 		$this->lang = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_ACCESS_LANGUAGE'] : "ko"; 
 		$this->http = !empty($_SERVER['HTTPS']) ? 'https' : 'http';
-		$this->time = time();
-		$this->date = date('Y-m-d H:i:s', $this->time);
 		$this->filename = basename($_SERVER['PHP_SELF']);
 		$this->dir = dirname(__FILE__);
 		$this->pdir = !empty($_SERVER['HTTP_HOST']) ? "{$this->http}://{$_SERVER['HTTP_HOST']}".dirname($_SERVER['PHP_SELF'])."/" : "";
+		
+		// 시간 설정
+		if (function_exists('date_default_timezone_set')) date_default_timezone_set('Asia/Seoul');
+		$this->time = time();
+		$this->date = date('Y-m-d H:i:s', $this->time);
 		
 		// 경로 마지막에 seperate 붙이기
 		if (!empty($this->dir) && !preg_match("/(\/|\\\)$/", $this->dir)) $this->dir .= DIRECTORY_SEPARATOR;		
