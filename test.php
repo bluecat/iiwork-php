@@ -2,7 +2,7 @@
 // iiwork framwork test unit
 
 include "ii.php";
-$ii = new iiWork(true);
+$ii = iiWork::getInstance(true);
 $ii->import("db.mysql");
 
 $sql = iiDBMysql::getInstance();

@@ -30,7 +30,7 @@ abstract class iiDB {
 	 * Singleton instance 가져오기
 	 * @param int instance no
 	 * @return iiDB
-	 * @description new_link 때문에 db instance를 no로 관리한다
+	 * @desc new_link 때문에 db instance를 no로 관리한다
 	 */
 	static public function getInstance($no = 0) {
 		if (!isset(self::$instance[$no])) {
@@ -48,20 +48,73 @@ abstract class iiDB {
 		if (!isset($this->sql)) throw new Exception('DB 연결이 필요합니다'); 
 	}
 	
-	abstract public function connect($host = "localhost", $id, $pass, $db = ''); // DB 접속	
-	abstract public function select_db($name); // DB를 선택한다
-	abstract public function close(); // DB 접속을 닫는다
-	abstract public function query($query); // 쿼리를 실행한다
-	abstract public function count($sql); // 결과수 가져오기
-	abstract public function fetch($sql); // 자료를 fetch 하여 return 한다
-	abstract public function getColumns($table); // 컬럼명을 가져온다
+	/**
+	 * DB 접속
+	 * @param string $host
+	 * @param string $id
+	 * @param string $pass
+	 * @param string $db
+	 */
+	abstract public function connect($host = "localhost", $id, $pass, $db = '');	
+	
+	/**
+	 * DB 선택
+	 * @param string $name
+	 */
+	abstract public function select_db($name);
+	
+	/**
+	 * DB 연결 끊기
+	 */
+	abstract public function close();
+	
+	/**
+	 * SQL Query 실행
+	 * @param string $query
+	 * @return link SQL Link
+	 */
+	abstract public function query($query);
+	
+	/**
+	 * Query 결과 수를 준다. 실패시 False 리턴
+	 * @param link $sql
+	 * @return int
+	 */
+	abstract public function count($sql);
+	
+	/**
+	 * SQL Fetch
+	 * @param link $sql
+	 * @return array column이 key로 된 배열을 리턴한다
+	 */
+	abstract public function fetch($sql);
+	
+	/**
+	 * Column들을 가져온다
+	 * @param string $table
+	 * @return array
+	 */
+	abstract public function getColumns($table);
+	
 //	abstract public function getInsertId(); // 마지막 입력된 seq를 가져온다
 	
 	/**
 	 * 쿼리문을 통해 자료를 갖고 온다
+	 * <code>
+	 * 		function test($data, $args) {
+	 * 			foreach ($args as $key => $val) {
+	 * 				echo "{$key}: {$val}";
+	 * 			}
+	 * 		}
+	 * 		$sql->gets('SELECT * FROM test', array('test', array('name'->'john'));
+	 *
+	 * 		results:
+	 * 			name: john
+	 * </code>
 	 * @param string $query
 	 * @param function $func null인 경우 배열로 리턴된다
 	 * @return array 자료가 없을 경우 false를 리턴한다
+	 * @desc $func 에 array를 넣는다면 첫번째가 함수명, 두번째가 두번째 인자로 넘어온다
 	 */
 	public function gets($query, $func = null) {
 		$q = $this->query($query);
@@ -72,7 +125,12 @@ abstract class iiDB {
 			while($data = $this->fetch($q)) {
 				// listener 호출
 				if ($func != null) {
-					$func($data);
+					if (!is_array($func)) {
+						$func($data);
+					}
+					else {
+						$func[0]($data, $func[1]);
+					}
 				}
 				else {
 					$output[] = $data;
@@ -90,6 +148,7 @@ abstract class iiDB {
 	 * 한개의 자료만 있다고 생각되는 경우 단순화하여 갖고 온다
 	 * @param string $query
 	 * @return mixed column이 한개일 경우 값만, 아닌 경우 key를 column 으로 가져온다
+	 * @desc column이 한개일 경우 문제가 생길 수 있음
 	 */
 	public function get($query) {
 		$data = $this->gets($query);
